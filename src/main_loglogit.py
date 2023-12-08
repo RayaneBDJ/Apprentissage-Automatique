@@ -61,6 +61,6 @@ for k, v in betas.items():
     print(f"{k:10}=\t{v:.3g}")
 
 # Get the results in a pandas table
-# Les résulats obtenis sont négatifs et je sais pas pourquoi. Il faudra investiguer comment interpréter les résultats.
+# Les résulats obtenus sont négatifs et je sais pas pourquoi. Il faudra investiguer comment interpréter les résultats.
 pandasResults = results.getEstimatedParameters() 
 print(pandasResults)

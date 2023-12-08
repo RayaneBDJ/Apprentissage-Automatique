@@ -7,6 +7,7 @@ database = db.Database("swissmetro", df)
 # On peut obtenir un array numpy à partir de pandas avec df.values
 
 # Removing some observations can be done directly using pandas.
+# on enlève PURPOSE = Commute et Business (on se focalise les choix hors travail) et Choice = unknown (car apporte aucune information)
 remove = (((database.data.PURPOSE != 1) & (database.data.PURPOSE != 3)) | (database.data.CHOICE == 0))
 database.data.drop(database.data[remove].index, inplace=True)
 
@@ -18,7 +19,8 @@ B_TIME = be.Beta('B_TIME', 0, None, None, 0)
 B_COST = be.Beta('B_COST', 0, None, None, 0)
 
 # Definition of new variables
-SM_COST = be.Variable('SM_CO') * (be.Variable('GA') == 0)
+# on enlève les personnes qui ont un abonnement de train/métro annuel, car forcément leur choix final est biaisé (= choisir ce pour quoi ils paient à l'année)
+SM_COST = be.Variable('SM_CO') * (be.Variable('GA') == 0) # GA = 1 => la personne a un abonnement annuel, 0 => non
 TRAIN_COST = be.Variable('TRAIN_CO') * (be.Variable('GA') == 0)
 
 # Definition of new variables: adding columns to the database
