@@ -1,6 +1,6 @@
 import logging
 from biogeme import models, biogeme as bio, expressions as be
-from swissmetro_preprocessing import (
+from swissmetro_biogeme_data import (
     database,
     ASC_TRAIN, 
     B_TIME, 
