@@ -11,31 +11,19 @@ class SwissmetroModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
         # Choix du nombre de couches arbitraire. Jouer avec.
-        self.linear1 = torch.nn.Linear(27, 540) # 27 variables en entrée
-        self.linear2 = torch.nn.Linear(540, 72) # 3 classes de sortie
-        self.linear3 = torch.nn.Linear(72, 3) # 3 classes de sortie
-        self.linear4 = torch.nn.Linear(3, 3) 
-        # self.linear7.weight = torch.nn.Parameter(
-        #     torch.from_numpy(np.array(
-        #         [[-0.701187, 0., -0.154633],
-        #         [0., 0.701187, 0.546555],
-        #         [-0.546555, 0.154633, 0.]]).astype(np.float32)), 
-        #      requires_grad=True)
-        # self.linear7.bias = torch.nn.Parameter(
-        #     torch.from_numpy(np.array([-0.415914, 0.285273, 0.130641]).astype(np.float32)), 
-        #      requires_grad=True)
-        self.relu = torch.nn.ReLU()
-        self.dropout = torch.nn.Dropout(0.25)
-        self.batch_norm1 = torch.nn.BatchNorm1d(540)
-        self.batch_norm2 = torch.nn.BatchNorm1d(72)
-        self.batch_norm3 = torch.nn.BatchNorm1d(3)
+        self.linear1 = torch.nn.Linear(27, 1080) # 27 variables en entrée
+        self.linear2 = torch.nn.Linear(1080, 540) # 3 classes de sortie
+        self.linear3 = torch.nn.Linear(540, 3) # 3 classes de sortie
+
+        self.relu = torch.nn.LeakyReLU()
+        self.dropout1 = torch.nn.Dropout(0.5)
+        self.dropout2 = torch.nn.Dropout(0.3)
 
     def forward(self, x):
-        y = self.batch_norm1(self.dropout(self.relu(self.linear1(x))))
-        y = self.batch_norm2(self.dropout(self.relu(self.linear2(y))))
-        y = self.batch_norm3(self.dropout(self.relu(self.linear3(y))))
+        y = self.dropout1(self.relu(self.linear1(x)))
+        y = self.dropout2(self.relu(self.linear2(y)))
 
-        return self.linear4(y) # Pas de fonction d'activation car CrossEntropyLoss s'en charge pour nous
+        return self.linear3(y) # Pas de fonction d'activation car CrossEntropyLoss s'en charge pour nous
 
 
 if __name__ == '__main__':

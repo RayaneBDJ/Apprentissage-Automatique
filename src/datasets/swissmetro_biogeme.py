@@ -20,6 +20,7 @@ B_COST = be.Beta('B_COST', 0, None, None, 0)
 
 # Definition of new variables
 # on enlève les personnes qui ont un abonnement de train/métro annuel, car forcément leur choix final est biaisé (= choisir ce pour quoi ils paient à l'année)
+# Correction: On n'enlève pas ces personnes, on met le coût à 0 pour ces personnes.
 SM_COST = be.Variable('SM_CO') * (be.Variable('GA') == 0) # GA = 1 => la personne a un abonnement annuel, 0 => non
 TRAIN_COST = be.Variable('TRAIN_CO') * (be.Variable('GA') == 0)
 
