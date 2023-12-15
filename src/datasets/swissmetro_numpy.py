@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-
+# Pour Sklearn (Non testé)
 def load_numpy_data():
     # Notre fichier de données
     df = pd.read_csv("data/swissmetro.dat", sep='\t')
@@ -9,7 +9,7 @@ def load_numpy_data():
     df.drop(df[((df['PURPOSE'] != 1) & (df['PURPOSE'] != 3)) | (df['CHOICE'] == 0)].index, inplace=True) 
 
     # On enlève la colonne CHOICE, qui correspond à notre vecteur r
-    X = df.drop('CHOICE', axis=1).values
+    X = df.drop('CHOICE', axis=1).values.astype(np.float32)
     # Décalage de 1 pour avoir les classes 0, 1 et 2
     y = df['CHOICE'].values - 1
 

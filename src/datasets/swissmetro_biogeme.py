@@ -12,9 +12,9 @@ remove = (((database.data.PURPOSE != 1) & (database.data.PURPOSE != 3)) | (datab
 database.data.drop(database.data[remove].index, inplace=True)
 
 # Parameters to be estimated
-ASC_CAR = be.Beta('ASC_CAR', 0, None, None, 0)
+ASC_CAR = be.Beta('ASC_CAR', 0, None, None, 1)
 ASC_TRAIN = be.Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = be.Beta('ASC_SM', 0, None, None, 1) # Le 1 veut dire que la variable est figée et ne sera pas modifiée par le modèle
+ASC_SM = be.Beta('ASC_SM', 0, None, None, 0) # Le 1 veut dire que la variable est figée et ne sera pas modifiée par le modèle
 B_TIME = be.Beta('B_TIME', 0, None, None, 0)
 B_COST = be.Beta('B_COST', 0, None, None, 0)
 

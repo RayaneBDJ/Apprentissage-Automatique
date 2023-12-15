@@ -1,6 +1,7 @@
 import logging
+import math
 from biogeme import models, biogeme as bio, expressions as be
-from swissmetro_biogeme_data import (
+from datasets.swissmetro_biogeme import (
     database,
     ASC_TRAIN, 
     B_TIME, 
@@ -49,11 +50,12 @@ logger.setLevel(logging.INFO)
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)
 biogeme.modelName = "b01logit" # Nom du rapport. Arbitraire.
-biogeme.calculateNullLoglikelihood(av) # Métrique de plus. Semble pas influencer les résultats.
+biogeme.calculateNullLoglikelihood(av) # Métrique de plus. Recommandé par le manuel.
 
 # Estimate the parameters
 results = biogeme.estimate()
 print(results.short_summary())
+
 
 # Print the estimated values
 betas = results.getBetaValues()
@@ -64,3 +66,6 @@ for k, v in betas.items():
 # Les résulats obtenus sont négatifs et je sais pas pourquoi. Il faudra investiguer comment interpréter les résultats.
 pandasResults = results.getEstimatedParameters() 
 print(pandasResults)
+values = pandasResults['Value']
+for val in values[0:2]:
+    print(1 / (1 + math.e ** val ))
