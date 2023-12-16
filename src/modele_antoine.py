@@ -1,3 +1,4 @@
+from functools import reduce
 import torch
 import numpy as np
 import tqdm
@@ -75,7 +76,7 @@ class Model2(torch.nn.Module):
 
  
 class Model3(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, n_layers=16):
         super().__init__()
         self.ASC_TRAIN = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.ASC_SM = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
@@ -83,11 +84,12 @@ class Model3(torch.nn.Module):
         self.B_TIME = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
 
-        self.theta_parameter1 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
-        self.theta_parameter2 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
-        self.theta_parameter3 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
-        self.theta_parameter4 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
-        self.theta_parameter5 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
+        self.thetas = torch.nn.ParameterList([
+            torch.nn.Parameter(torch.randn(24, 24)) for _ in range(n_layers)
+        ])
+
+        self.calculate_h = lambda V, theta: F.softplus(torch.matmul(V, theta))
+        self.cumulate = lambda resultats: reduce(lambda x, y: x + y, resultats) if len(resultats) > 0 else 0
 
     def forward(self, x):
         V1 = self.ASC_TRAIN + self.B_TIME * x[:, 19] + self.B_COST * x[:, 20]
@@ -96,14 +98,13 @@ class Model3(torch.nn.Module):
         y = x[:, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,24]] # enlève col TRAIN [:19, :20], SM [:22, :23], CAR [:25, :26]
         V = torch.concat((y, V1.unsqueeze(1), V2.unsqueeze(1), V3.unsqueeze(1)), dim=1)
 
-        out1 = V - F.softplus(torch.matmul(V, self.theta_parameter1))
-        out2 = out1 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2))
-        out3 = out2 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3))
-        out4 = out3 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3)) - F.softplus(torch.matmul(out3, self.theta_parameter4))
-        out5 = out4 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3)) - F.softplus(torch.matmul(out3, self.theta_parameter4)) - F.softplus(torch.matmul(out4, self.theta_parameter5))
-        out6 = out5 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3)) - F.softplus(torch.matmul(out3, self.theta_parameter4)) - F.softplus(torch.matmul(out4, self.theta_parameter5)) - F.softplus(torch.matmul(out5, self.theta_parameter6))
+        residual_results = []
+        out = V
+        for theta in self.thetas:
+            residual_results.append(self.calculate_h(out, theta))
+            out = out - self.cumulate(residual_results)
 
-        return out6
+        return out
     
 
 class Model4(torch.nn.Module):
