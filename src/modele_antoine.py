@@ -53,7 +53,7 @@ class Model2(torch.nn.Module):
         self.B_TIME = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
 
-        self.linear1 = torch.nn.Linear(30, 120) # 27 variables en entrée
+        self.linear1 = torch.nn.Linear(24, 120) # 27 variables en entrée
         self.linear2 = torch.nn.Linear(120, 60) # 3 classes de sortie
         self.linear3 = torch.nn.Linear(60, 3) # 3 classes de sortie
 
@@ -90,9 +90,9 @@ class Model3(torch.nn.Module):
         self.theta_parameters.append(self.theta_parameter1)
         self.theta_parameters.append(self.theta_parameter2)
 
-        self.linear1 = torch.nn.Linear(24, 24) # 27 variables en entrée
-        self.linear2 = torch.nn.Linear(24, 24) # 3 classes de sortie
-        self.linear3 = torch.nn.Linear(24, 3) # 3 classes de sortie
+        self.linear1 = torch.nn.Linear(24, 120) # 27 variables en entrée
+        self.linear2 = torch.nn.Linear(120, 60) # 3 classes de sortie
+        self.linear3 = torch.nn.Linear(60, 3) # 3 classes de sortie
 
         self.relu = torch.nn.LeakyReLU()
         self.dropout1 = torch.nn.Dropout(0.5)
@@ -109,7 +109,7 @@ class Model3(torch.nn.Module):
         V = torch.concat((y, V1.unsqueeze(1), V2.unsqueeze(1), V3.unsqueeze(1)), dim=1)
 
         out = self.linear1(V)
-        out = F.softplus(torch.matmul(out, self.theta_parameter1))
+        out -= F.softplus(torch.matmul(out, self.theta_parameter1))
         out = self.linear2(out)
         out += V
 
