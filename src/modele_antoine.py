@@ -101,8 +101,9 @@ class Model3(torch.nn.Module):
         out3 = out2 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3))
         out4 = out3 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3)) - F.softplus(torch.matmul(out3, self.theta_parameter4))
         out5 = out4 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3)) - F.softplus(torch.matmul(out3, self.theta_parameter4)) - F.softplus(torch.matmul(out4, self.theta_parameter5))
+        out6 = out5 - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out1, self.theta_parameter2)) - F.softplus(torch.matmul(out2, self.theta_parameter3)) - F.softplus(torch.matmul(out3, self.theta_parameter4)) - F.softplus(torch.matmul(out4, self.theta_parameter5)) - F.softplus(torch.matmul(out5, self.theta_parameter6))
 
-        return out5
+        return out6
     
 
 class Model4(torch.nn.Module):
@@ -114,20 +115,26 @@ class Model4(torch.nn.Module):
         self.B_TIME = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
 
-        self.theta_parameter1 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
-        self.theta_parameter2 = torch.nn.Parameter(torch.randn(24,24), requires_grad=True)
+        self.linear1 = torch.nn.Linear(27, 120) # 27 variables en entrée
+        self.linear2 = torch.nn.Linear(120, 27) # 3 classes de sortie
+
+        self.relu = torch.nn.LeakyReLU()
 
     def forward(self, x):
+        y = self.relu(self.linear1(x))
+        y = self.relu(self.linear2(y))
+
+        out = y # WIP
+
         V1 = self.ASC_TRAIN + self.B_TIME * x[:, 19] + self.B_COST * x[:, 20]
         V2 = self.ASC_SM + self.B_TIME * x[:, 22] + self.B_COST * x[:, 23]
         V3 = self.ASC_CAR + self.B_TIME * x[:, 25] + self.B_COST * x[:, 26]
         y = x[:, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,24]] # enlève col TRAIN [:19, :20], SM [:22, :23], CAR [:25, :26]
-        V = torch.concat((y, V1.unsqueeze(1), V2.unsqueeze(1), V3.unsqueeze(1)), dim=1)
+    
+        out = out + y
+        V = torch.concat((out, V1.unsqueeze(1), V2.unsqueeze(1), V3.unsqueeze(1)), dim=1)
 
-        out = V - F.softplus(torch.matmul(V, self.theta_parameter1))
-        out = out - F.softplus(torch.matmul(V, self.theta_parameter1)) - F.softplus(torch.matmul(out, self.theta_parameter2))
-
-        return out
+        return V
 
 
 if __name__ == '__main__':
