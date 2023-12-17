@@ -24,7 +24,6 @@ class ResidualBlock(torch.nn.Module):
         self.cumulate = lambda resultats: reduce(lambda x, y: x + y, resultats) if len(resultats) > 0 else 0
     
     def forward(self, V):
-
         layer_results = []
         out = V
         for layer in self.layers:
@@ -53,7 +52,7 @@ class SwissMetroResLogit(torch.nn.Module):
         self.ASC_CAR = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_TIME = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
-        self.residual_block1 = ResidualBlock(24, 24)
+        self.residual_block = ResidualBlock(24, 24)
         self.output = OutputLayer(24, 3)
 
     def forward(self, x):
@@ -63,6 +62,6 @@ class SwissMetroResLogit(torch.nn.Module):
         y = x[:, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,24]] # enlève col TRAIN [:19, :20], SM [:22, :23], CAR [:25, :26]
         V = torch.concat((y, V1.unsqueeze(1), V2.unsqueeze(1), V3.unsqueeze(1)), dim=1)
 
-        U1 = self.residual_block1(V)
-        expU = torch.exp(U1)
-        return self.output(expU / torch.sum(expU, dim=1).unsqueeze(1))
+        U = self.residual_block(V)
+        
+        return self.output(torch.softmax(U, dim=1))
