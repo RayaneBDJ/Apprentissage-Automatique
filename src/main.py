@@ -4,7 +4,7 @@ import numpy as np
 import tqdm
 from datasets.swissmetro_dataset import SwissmetroDataSet
 from models.model_multinomial_logit import MultinomialLogitModel
-from models.model_mlp import MLPModel
+from models.model_mlp import MLPModel16, MLPModel2, MLPModel8
 from models.model_reslogit import ResLogitModel
 from models.model_LMNL import LMNLModel
 from torch_utils import compute_accuracy
@@ -20,10 +20,17 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 # Initialisation modèle
-# model = MultinomialLogitModel()
-# model = MLPModel()
-model = ResLogitModel()
-# model = LMNLModel()
+models = {
+    'mnl': MultinomialLogitModel(),
+    'mlp-2': MLPModel2(),
+    'mlp-8': MLPModel8(),
+    'mlp-16': MLPModel16(),
+    'reslogit-2': ResLogitModel(2),
+    'reslogit-8': ResLogitModel(8),
+    'reslogit-16': ResLogitModel(16),
+    'lmnl': LMNLModel()
+}
+model = models['mlp-8']
 model.to(DEVICE)
 
 # Initialisation rétropropagation
@@ -32,10 +39,12 @@ loss_fct = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
 
 # Lancement entrainement
-n_epochs = 1000
+n_epochs = 600
 n_batches_per_epoch = int(math.ceil(len(train_loader.dataset) / batch_size))
 best_accuracy = 0
 best_weights = None
+accuracy_per_epoch = []
+loss_per_epoch = []
 for t in range(n_epochs):
     model.train()
     with tqdm.trange(n_batches_per_epoch, unit='batch') as epoch_bar:
@@ -62,11 +71,20 @@ for t in range(n_epochs):
                 'loss': epoch_loss / one_indexed_i,
                 'accuracy': epoch_accuracy / one_indexed_i
             })
+
     # Utile pour savoir à quelle epoch le modèle a le mieux performé
-    epoch_accuracy = compute_accuracy(model, test_loader)
-    if epoch_accuracy > best_accuracy:
-        best_accuracy = epoch_accuracy
+    epoch_test_accuracy = compute_accuracy(model, test_loader)
+    loss_per_epoch.append(epoch_loss)
+    accuracy_per_epoch.append(epoch_test_accuracy)
+    if epoch_test_accuracy > best_accuracy:
+        best_accuracy = epoch_test_accuracy
         best_weights = model.state_dict()
-    print(f'Epoch {t} test accuracy: {epoch_accuracy* 100}%')
+    print(f'Epoch {t} test accuracy: {epoch_test_accuracy * 100}%')
 
 print(f'Meilleur cas: {best_accuracy * 100}%')
+
+for name, modelObj in models.items():
+    if modelObj == model:
+        model_name = name 
+np.savetxt(f'{model_name}_test_accuracy.csv', np.array(accuracy_per_epoch), delimiter=';')
+np.savetxt(f'{model_name}_loss.csv', np.array(loss_per_epoch), delimiter=';')

@@ -5,16 +5,14 @@ from models.residual_components import OutputLayer, ResidualBlock
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 class ResLogitModel(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, n_layers=2):
         super().__init__()
         self.ASC_TRAIN = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.ASC_SM = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.ASC_CAR = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_TIME = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
-        self.residual_block = ResidualBlock(24, 24, n_layers=6)
-        # self.residual_block1 = ResidualBlock(24, 24)
-        # self.residual_block2 = ResidualBlock(24, 24)
+        self.residual_block = ResidualBlock(24, 24, n_layers=n_layers)
         self.output = OutputLayer(24, 3)
 
     def forward(self, x):
@@ -26,8 +24,4 @@ class ResLogitModel(torch.nn.Module):
 
         U = self.residual_block(V)
 
-        return self.output(torch.softmax(V, dim=1))
-
-        # U = self.residual_block1(V)
-        # W = self.residual_block2(U)
-        # return self.output(torch.softmax(W, dim=1))
+        return self.output(torch.softmax(U, dim=1))
