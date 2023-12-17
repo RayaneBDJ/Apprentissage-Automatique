@@ -31,7 +31,7 @@ models = {
     'reslogit-16': ResLogitModel(16),
     'lmnl': LMNLModel()
 }
-model = models['mlp-8']
+model = models['mlp-2']
 model.to(DEVICE)
 
 # Initialisation rétropropagation

@@ -12,6 +12,7 @@ class ResLogitModel(torch.nn.Module):
         self.ASC_CAR = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_TIME = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+        
         self.residual_block = ResidualBlock(24, 24, n_layers=n_layers)
         self.output = OutputLayer(24, 3)
 
