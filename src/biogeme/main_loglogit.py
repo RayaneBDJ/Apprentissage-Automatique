@@ -1,7 +1,7 @@
 import logging
 import math
 from biogeme import models, biogeme as bio, expressions as be
-from datasets.swissmetro_biogeme import (
+from biogeme.swissmetro_biogeme import (
     database,
     ASC_TRAIN, 
     B_TIME, 

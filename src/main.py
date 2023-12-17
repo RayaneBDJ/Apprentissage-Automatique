@@ -3,12 +3,15 @@ import torch
 import numpy as np
 import tqdm
 from datasets.swissmetro_dataset import SwissmetroDataSet
-from model import SwissMetroResLogit
+from models.model_multinomial_logit import MultinomialLogitModel
+from models.model_mlp import MLPModel
+from models.model_reslogit import ResLogitModel
+from models.model_LMNL import LMNLModel
 from torch_utils import compute_accuracy
 
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-torch.manual_seed(4328)
+torch.manual_seed(4328) # TODO remove
 # Preparation données
 dataset = SwissmetroDataSet("data/swissmetro.dat")
 train_dataset, test_dataset = torch.utils.data.random_split(dataset, lengths=[0.5, 0.5])
@@ -17,12 +20,14 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 # Initialisation modèle
-model = SwissMetroResLogit()
+# model = MultinomialLogitModel()
+# model = MLPModel()
+model = ResLogitModel()
+# model = LMNLModel()
 model.to(DEVICE)
 
 # Initialisation rétropropagation
 learning_rate = 0.01
-momentum = 0.2
 loss_fct = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
 
@@ -46,6 +51,8 @@ for t in range(n_epochs):
             loss = loss_fct(prediction, targets)
             loss.backward()
             optimizer.step()
+            with torch.no_grad():
+                max_likelihood = torch.softmax(prediction, dim=1)
             pred_targets = torch.argmax(prediction, dim=1)
             epoch_accuracy += float(torch.count_nonzero(pred_targets == targets) / len(targets))
             epoch_loss += float(loss)
