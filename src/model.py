@@ -28,8 +28,9 @@ class ResidualBlock(torch.nn.Module):
         layer_results = []
         out = V
         for layer in self.layers:
-            layer_results.append(layer(out))
-            out = out - self.cumulate(layer_results)
+            layer_result = layer(out)
+            layer_results.append(layer_result)
+            out = out - layer_result
 
         return V - self.cumulate(layer_results)
 
@@ -41,7 +42,7 @@ class OutputLayer(torch.nn.Module):
         self.bias = torch.nn.Parameter(torch.rand(n_features_out,), requires_grad=True)
 
     def forward(self, V):
-        return torch.relu(torch.matmul(V, self.weights) + self.bias)
+        return torch.nn.functional.relu(torch.matmul(V, self.weights) + self.bias)
 
 
 class SwissMetroResLogit(torch.nn.Module):

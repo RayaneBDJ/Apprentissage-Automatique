@@ -12,9 +12,8 @@ torch.manual_seed(4328)
 # Preparation données
 dataset = SwissmetroDataSet("data/swissmetro.dat")
 train_dataset, test_dataset = torch.utils.data.random_split(dataset, lengths=[0.5, 0.5])
-#weightedSampler = torch.utils.data.WeightedRandomSampler(weights=train_dataset.dataset.get_balanced_weights(train_dataset.indices), num_samples=6000, replacement=True)
 batch_size = 50
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 # Initialisation modèle
