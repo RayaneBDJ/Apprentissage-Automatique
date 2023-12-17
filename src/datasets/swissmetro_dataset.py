@@ -20,3 +20,14 @@ class SwissmetroDataSet(torch.utils.data.Dataset):
     
     def __getitem__(self, i) -> Tuple[np.array, np.array]:
         return self.X[i], self.y[i]
+    
+    def get_balanced_weights(self, indices):
+        subset_y = self.y[indices]
+        classes = np.unique(subset_y)
+        weights = np.empty_like(subset_y, dtype=np.float32)
+        for klass in classes:
+            class_mask = subset_y == klass
+            n_samples_of_class = np.count_nonzero(class_mask)
+            weights[class_mask] = weights.size / n_samples_of_class
+        
+        return weights

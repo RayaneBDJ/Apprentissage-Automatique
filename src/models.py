@@ -1,3 +1,4 @@
+import copy
 from functools import reduce
 import torch
 import numpy as np
@@ -78,15 +79,16 @@ class Model2(torch.nn.Module):
 class Model3(torch.nn.Module):
     def __init__(self, n_layers=16):
         super().__init__()
-        self.ASC_TRAIN = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
-        self.ASC_SM = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
-        self.ASC_CAR = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
-        self.B_TIME = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
-        self.B_COST = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+        self.ASC_TRAIN = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+        self.ASC_SM = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+        self.ASC_CAR = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+        self.B_TIME = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+        self.B_COST = torch.nn.Parameter(torch.rand(1, dtype=torch.float, device=DEVICE), requires_grad=True)
 
         self.thetas = torch.nn.ParameterList([
-            torch.nn.Parameter(torch.randn(24, 24)) for _ in range(n_layers)
+            torch.nn.Parameter(torch.rand(24, 24)) for _ in range(n_layers)
         ])
+
 
         self.calculate_h = lambda V, theta: F.softplus(torch.matmul(V, theta))
         self.cumulate = lambda resultats: reduce(lambda x, y: x + y, resultats) if len(resultats) > 0 else 0
@@ -104,7 +106,7 @@ class Model3(torch.nn.Module):
             residual_results.append(self.calculate_h(out, theta))
             out = out - self.cumulate(residual_results)
 
-        return out
+        return V + out
     
 
 class Model4(torch.nn.Module):
