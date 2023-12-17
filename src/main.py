@@ -11,12 +11,13 @@ from torch_utils import compute_accuracy
 
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-torch.manual_seed(4328) # TODO remove
+torch.manual_seed(4328) # important pour les tests
+
 # Preparation données
 dataset = SwissmetroDataSet("data/swissmetro.dat")
 train_dataset, test_dataset = torch.utils.data.random_split(dataset, lengths=[0.5, 0.5])
 batch_size = 50
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True) # shuffle important
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 # Initialisation modèle
@@ -86,5 +87,6 @@ print(f'Meilleur cas: {best_accuracy * 100}%')
 for name, modelObj in models.items():
     if modelObj == model:
         model_name = name 
+
 np.savetxt(f'{model_name}_test_accuracy.csv', np.array(accuracy_per_epoch), delimiter=';')
 np.savetxt(f'{model_name}_loss.csv', np.array(loss_per_epoch), delimiter=';')
