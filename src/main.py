@@ -11,12 +11,13 @@ from torch_utils import compute_accuracy
 
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-torch.manual_seed(4328) # TODO remove
+torch.manual_seed(4328) # important pour les tests
+
 # Preparation données
 dataset = SwissmetroDataSet("data/swissmetro.dat")
 train_dataset, test_dataset = torch.utils.data.random_split(dataset, lengths=[0.5, 0.5])
 batch_size = 50
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True) # shuffle important
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 
 # Initialisation modèle
@@ -24,6 +25,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
 # model = MLPModel()
 model = ResLogitModel()
 # model = LMNLModel()
+# AdaBoost intéressant à implémenter car weaklearner
 model.to(DEVICE)
 
 # Initialisation rétropropagation
@@ -31,7 +33,7 @@ learning_rate = 0.01
 loss_fct = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(params=model.parameters(), lr=learning_rate)
 
-# Lancement entrainement
+# Lancement entraînement
 n_epochs = 1000
 n_batches_per_epoch = int(math.ceil(len(train_loader.dataset) / batch_size))
 best_accuracy = 0
@@ -62,7 +64,8 @@ for t in range(n_epochs):
                 'loss': epoch_loss / one_indexed_i,
                 'accuracy': epoch_accuracy / one_indexed_i
             })
-    # Utile pour savoir à quelle epoch le modèle a le mieux performé
+
+    # Utile pour savoir la meilleure performance du modèle sur toutes les époques
     epoch_accuracy = compute_accuracy(model, test_loader)
     if epoch_accuracy > best_accuracy:
         best_accuracy = epoch_accuracy
