@@ -5,7 +5,7 @@ Lien vers le [repository Github](https://github.com/louisgreiner/Apprentissage-A
 ## Equipe 26
 
 - Rayane Badji (NI: 537 177 500)
-- Antoine Gagnon Coulombe (NI: )
+- Antoine Gagnon Coulombe (NI: 111 064 130)
 - Louis Greiner (NI: 537 160 604)
 - Marie Guigon (NI: 537 161 152)
 - Charles Hao (NI: 537 160 602)
