@@ -1,10 +1,8 @@
 import torch
 
-
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-
-class MultinomialLogitModel(torch.nn.Module):
+class MNLModel(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.ASC_TRAIN = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
@@ -12,6 +10,8 @@ class MultinomialLogitModel(torch.nn.Module):
         self.ASC_CAR = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_TIME = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
         self.B_COST = torch.nn.Parameter(torch.randn(1, dtype=torch.float, device=DEVICE), requires_grad=True)
+
+        self.linear = torch.nn.Linear(24, 3)
 
     def forward(self, x):
         V1 = self.ASC_TRAIN + self.B_TIME * x[:, 19] + self.B_COST * x[:, 20]
@@ -24,4 +24,4 @@ class MultinomialLogitModel(torch.nn.Module):
         y = x[:, [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,21,24]]
         V = torch.concat((y, V1.unsqueeze(1), V2.unsqueeze(1), V3.unsqueeze(1)), dim=1)
 
-        return V
+        return self.linear(V)
